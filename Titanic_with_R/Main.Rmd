@@ -29,6 +29,7 @@ library(randomForest) # Prediction: Random Forest
 library(caret) # Prediction: k-Fold Cross Validation
 ```
 With this titanic dataset, I explore five classification algorithms: Logistic Regression, Support Vector Machines (both linear and non-linear), Decision Tree, Random Forest, and Naive Bayes.
+
 ## Input Data
 ```{r read data, include=FALSE}
 titanic_train <-read.csv('input/train.csv', stringsAsFactors = FALSE)
@@ -47,7 +48,8 @@ str(titanic)
 # Checking missing values (missing values or empty values)
 colSums(is.na(titanic)|titanic=='')
 ```
-Cabin has the most number of missing values, 1014 values. Age has 263 missing values while Embarked and Fare have two and one missing values, respectively.
+Cabin has the most number of missing values, 1014 values. Age has 263 missing values while Embarked and Fare have two and one missing values, respectively.  
+
 ## Missing Fare Data Imputation
 ```{r missing Fare}
 # Extract the row which contains the missing Fare
@@ -71,7 +73,8 @@ titanic$Fare[is.na(titanic$Fare)==TRUE] = median(filter(titanic, Pclass==3 & Emb
 # Checking missing values
 colSums(is.na(titanic)|titanic=='')
 ```
-The missing fare has been replaced.
+The missing fare has been replaced.  
+
 ## Missing Embarked Data Imputation
 We have noticed that there are two missing values for the Embarked feature.
 ```{r missing Embarked }
@@ -101,6 +104,7 @@ titanic$Embarked[titanic$Embarked==""] = "C"
 # Checking missing values
 colSums(is.na(titanic)|titanic=='')
 ```
+
 ## Missing Age Data Imputation
 ```{r}
 ggplot(titanic,aes(Pclass,Age)) +                                                  
@@ -135,7 +139,8 @@ Let’s check if the above imputation method worked.
 # Checking missing values
 colSums(is.na(titanic)|titanic=='')
 ```
-It worked. Now we are left with only Cabin missing values. However, due to the high number of missing values of Cabin feature, I keep the Cabin feature as it is and stop here.
+It worked. Now we are left with only Cabin missing values. However, due to the high number of missing values of Cabin feature, I keep the Cabin feature as it is and stop here.  
+
 # Feature Engineering
 ## Passenger Title
 Since the title of the passengers is contained within the passenger name feature, let’s do some feature engineering to create a new feature with passenger titles.
@@ -162,7 +167,9 @@ titanic$Title[titanic$Title %in% Other]  <- 'Other'
 table(titanic$Sex, titanic$Title)
 ```
 The title is down to five categories. We will do exploratory analysis based on title in the next section.
+
 ## Family Size
+
 ```{r}
 FamilySize <- titanic$SibSp + titanic$Parch + 1
 
@@ -178,6 +185,7 @@ titanic$FamilySize <- sapply(1:nrow(titanic), function(x)
 table(titanic$FamilySize)
 ```
 In the next section, we will do some exploratory anaysis based on family size.
+
 # Exploratory Data Analysis
 ##  Encoding the categorical features as factors
 ```{r}
@@ -191,6 +199,7 @@ titanic$FamilySize = factor(titanic$FamilySize, levels=c("Single","Small","Large
 #Checking the structure of the data
 str(titanic)
 ```
+
 ## Exploratory Data Analysis on Pclass, Sex and Age
 ```{r}
 ggplot(filter(titanic, is.na(Survived)==FALSE), aes(Pclass, fill=Survived)) + 
@@ -228,6 +237,7 @@ ggplot(filter(titanic, is.na(Survived)==FALSE), aes(Pclass, Age)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 Overall, the passengers in the higher classes tend to be older disregard to whether they survived or not.
+
 # Exploratory Data Analysis on Title and FamilySize
 ```{r}
 mosaicplot(~ Title + Survived, data=titanic, main='Survival Rate based on Title', shade=TRUE)
@@ -263,6 +273,7 @@ ggplot(filter(titanic, is.na(Survived)==FALSE), aes(Title)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 The filled bar chart illustrates that we can preserve our rule: large families had the worst survival rate than singletons and small families. Infact, each member of the large families - Master, Miss, Mr and Mrs - suffered the lowest survival rate than their counterparts in other types of families.
+
 ## Exploratory Data Analysis on Fare and Embarked
 ```{r}
 ggplot(filter(titanic, is.na(Survived)==FALSE), aes(Embarked, Fare)) + 
@@ -277,18 +288,18 @@ Interestingly, there is a substantial variation of fares in the survived categor
 
 Visual analysis of data concludes:
 
-+the wealthier passengers in the first class had a higher survival rate;
-*females had a higher survival rate than males in each class;
-+male “Mr” passengers had the lowest survival rate amongst all the classes; and
+* the wealthier passengers in the first class had a higher survival rate;
+* females had a higher survival rate than males in each class;
+* male “Mr” passengers had the lowest survival rate amongst all the classes; and
 large families had the worst survival rate than singletons and small families.
 
 After rectifying the missing values and exploring data visually, finally, we are ready to predict whether or not each passenger in the test set survived the sinking of the Titanic. I identify the following features may contribute to the prediction of the survival and include them in the classification algorithms: Pclass, Sex, Age, SibSp, Parch, Fare, Embarked, Title and FamilySize.
 
-*I ignore the feature Name as I have created a new feature Title from it and I believe the title has more predictive power than just name.
+* I ignore the feature Name as I have created a new feature Title from it and I believe the title has more predictive power than just name.
 
-*I ignore the feature Ticket as I believe it does not preserve any predictive power on survival.
+* I ignore the feature Ticket as I believe it does not preserve any predictive power on survival.
 
-*I ignore the feature Cabin since it has many missing values.
+* I ignore the feature Cabin since it has many missing values.
 
 # Prediction
 ## Splitting the dataset into the Training set and Test set
@@ -302,6 +313,7 @@ After rectifying the missing values and encoding the categorical features as fac
 train_original <- titanic[1:891, c("Survived","Pclass","Sex","Age","SibSp","Parch","Fare","Embarked","Title","FamilySize")]
 test_original <- titanic[892:1309, c("Pclass","Sex","Age","SibSp","Parch","Fare","Embarked","Title","FamilySize")]
 ```
+
 ## Splitting the training set into the Training set and Validation set
 Now I split the training set into the training set (80% of training data) and validation set (20% of training data) for the evaluation purposes of the fitted models.
 ```{r}
@@ -311,6 +323,7 @@ split = sample.split(train_original$Survived, SplitRatio = 0.8)
 train = subset(train_original, split == TRUE)
 test = subset(train_original, split == FALSE)
 ```
+
 ## Logistic Regression
 ```{r}
 # Show the correlation of numeric features
@@ -399,6 +412,7 @@ plot(fitperf,col="green",lwd=2,main="ROC Curve")
 abline(a=0,b=1,lwd=2,lty=2,col="gray")
 ```
 The ROC (Receiver Operating Characteristics) curve is a graphical representation of the performnace of the classifier and it shows the performance of our model rises well above the diagonal line. This indicates that our logistic regression model performs better than just a random guess. The logistic regression model delivers a whooping 0.8539 accuracy interms of predicting the survival.
+
 ## Support Vector Machines
 ```{r}
 # Checking the variance of numeric features
@@ -487,6 +501,7 @@ error <- mean(test$Survived != y_pred) # Misclassification error
 paste('Accuracy',round(1-error,4))
 ```
 The accuracy went down to 0.8315. We were not able to improve our model. Infact, the best non-linear SVM was already a good model with accuracy 0.8820. I retain that model as my best non-linear SVM model with cost=1 and gamma=0.0625.
+
 ## Decision Tree
 The Decision Tree does not require feature scaling. Let’s fit a decision tree model to our training data.
 ```{r}
@@ -590,6 +605,7 @@ ggplot(gini,aes(reorder(Feature,MeanGini), MeanGini, group=1)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 The feature Title has the highest mean gini index, hence the highest importance. Fare is also realtively high important and it is followed by Age of the passengers.
+
 ## Naive Bayes
  Naive Bayes is based on the assumption that conditional probability of each feature given the class is independent of all the other features. The assumption of independent conditional probabilities means the features are completely independent of each other. This assumption was already checked in the Logistic Regression section and we have found that numeric features are independent to each other, however, the categorical features are not. By assuming the idependence assumption of all the features, let’s fit a naive bayes model to our training data.
 ```{r}
@@ -607,6 +623,7 @@ error <- mean(test$Survived != y_pred) # Misclassification error
 paste('Accuracy',round(1-error,4))
 ```
 Naive Bayes classification performs well for our validation data with an accuracy of 0.8427. Note that the accuracy is identical to the Random Forest classification accuracy (without 10-fold cross validation).
+
 # Results
 ```{r}
 # Predicting the Test set results
