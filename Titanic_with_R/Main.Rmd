@@ -2,11 +2,21 @@
 title: "Begining with Titanic"
 author: Le Tan Dang Khoa
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: 
-  pdf_document: default
+output:
+  pdf_document:
+    includes:
+      in_header: header.tex
+    number_sections: yes
+    toc: yes
+  word_document:
+    toc: yes
   html_document:
-    df_print: paged
-  word_document: default
+    theme: cerulean
+    toc: yes
+    toc_float: yes
+geometry: margin=2cm
+editor_options: 
+  chunk_output_type: inline
 ---
 # Introduction
 This project involves the analysis and the prediction of the people who were more likely to survive on the British liner named Titanic, that sank in the North Atlantic Ocean in the early morning of 15 April 1912 after colliding with an iceberg during her maiden voyage from Southampton, UK, to New York City, US.. Titanic only carried enough lifeboats for 1,178 people, slightly more than half of the number of the people on board, and one-third her total capacity.
